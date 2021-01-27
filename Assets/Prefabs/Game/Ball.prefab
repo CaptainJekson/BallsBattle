@@ -109,7 +109,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _blueMaterial: {fileID: 2100000, guid: 08a4171118b5a84479e3987ba3b5826a, type: 2}
   _redMaterial: {fileID: 2100000, guid: fdf125b6d91afe844b8172ebf9e45556, type: 2}
-  _decreaseSpeed: 0.033
+  _decreaseSpeed: 0.025
 --- !u!54 &4306796033957017098
 Rigidbody:
   m_ObjectHideFlags: 0

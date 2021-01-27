@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using Serializable;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Game
 {
@@ -13,6 +14,12 @@ namespace Game
 
         private void Awake()
         {
+            LoadConfig();
+            LoadScenes();
+        }
+        
+        private void LoadConfig()
+        {
             _config = new Config();
 
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -24,6 +31,11 @@ namespace Game
             {
                 _config = JsonUtility.FromJson<Config>(File.ReadAllText(_path));
             }
+        }
+
+        private void LoadScenes()
+        {
+            SceneManager.LoadScene("UI", LoadSceneMode.Additive);
         }
     }
 }

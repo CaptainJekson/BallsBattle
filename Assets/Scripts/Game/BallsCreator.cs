@@ -34,6 +34,8 @@ namespace Game
                 var randomDirection = new Vector3(Random.Range(-1.0f, 1.0f), 0.0f, Random.Range(-1.0f, 1.0f));
                 ball.StartMoving(randomDirection);
             }
+            
+            _gameListener.OnStartGame();
         }
         
         private IEnumerator UnitSpawnDelay(bool isEnemy)

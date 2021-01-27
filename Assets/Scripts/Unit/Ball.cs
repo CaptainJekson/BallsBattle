@@ -19,6 +19,7 @@ namespace Unit
         private MeshRenderer _meshRenderer;
 
         public bool IsEnemy => _isEnemy;
+        public float Radius => _radius;
 
         private void Awake()
         {
