@@ -66,7 +66,7 @@ namespace Game
             
             QuantityOfBallsChanged?.Invoke(_sumOfPlayerRadius, _sumOfEnemyRadius);
             
-            Debug.LogError($"Player ball - {_playerBalls} Enemy ball - {_enemyBalls}");
+            Debug.Log($"Player ball - {_playerBalls} Enemy ball - {_enemyBalls}");
             
             if(_enemyBalls <= 0 || _playerBalls <= 0)
                 GameOver?.Invoke(_enemyBalls <= 0, DateTime.Now - _startGameTime);

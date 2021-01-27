@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Configs;
 using Game;
 using UnityEngine;
 
@@ -9,7 +9,7 @@ namespace Unit
     {
         [SerializeField] private Material _blueMaterial;
         [SerializeField] private Material _redMaterial;
-        [SerializeField] [Range(0.01f, 0.5f)] private float _decreaseSpeed;
+        [SerializeField] private BallEffectsConfig _ballEffectsConfig;
 
         private bool _isEnemy;
         private float _speed;
@@ -17,6 +17,7 @@ namespace Unit
         private float _unitDestroyRadius;
         private Vector3 _direction;
         private MeshRenderer _meshRenderer;
+        private GameListener _gameListener;
 
         public bool IsEnemy => _isEnemy;
         public float Radius => _radius;
@@ -24,21 +25,25 @@ namespace Unit
         private void Awake()
         {
             _meshRenderer = GetComponent<MeshRenderer>();
+            _gameListener = FindObjectOfType<GameListener>();
         }
 
         private void Update()
         {
             Move();
         }
-        
+
         private void OnCollisionEnter(Collision other)
         {
             var normal = new Vector3(other.contacts[0].normal.x, 0.0f, other.contacts[0].normal.z);
 
             var anotherBall = other.gameObject.GetComponent<Ball>();
-            
+
             if (anotherBall != null && anotherBall.IsEnemy != IsEnemy)
+            {
+                PlayEffect(_ballEffectsConfig.Reduce);
                 return;
+            }
 
             Bounce(normal);
         }
@@ -51,12 +56,17 @@ namespace Unit
 
                 if (anotherBall != null && anotherBall.IsEnemy != IsEnemy)
                 {
-                    Reduce();
+                    Reduce(anotherBall);
                 }
             }
         }
 
-        public void Init(float speed, float radius, float unitDestroyRadius,bool isEnemy = false)
+        private void OnDestroy()
+        {
+            _gameListener.RemoveBall(this);
+        }
+
+        public void Init(float speed, float radius, float unitDestroyRadius, bool isEnemy = false)
         {
             _isEnemy = isEnemy;
             _speed = speed;
@@ -64,9 +74,11 @@ namespace Unit
             _unitDestroyRadius = unitDestroyRadius;
 
             _meshRenderer.material = isEnemy ? _redMaterial : _blueMaterial;
-            transform.localScale = Vector3.one * _radius;
+            transform.localScale = Vector3.one * (_radius * 2);
+
+            PlayEffect(_ballEffectsConfig.Spawn);
         }
-        
+
         public void StartMoving(Vector3 direction)
         {
             _direction = direction;
@@ -75,11 +87,23 @@ namespace Unit
         private void Bounce(Vector3 normal)
         {
             _direction = Vector3.Reflect(_direction, normal);
+            PlayEffect(_ballEffectsConfig.Collision);
         }
 
-        private void Reduce()
+        private void Reduce(Ball anotherBall)
         {
-            transform.localScale -= new Vector3(_decreaseSpeed, _decreaseSpeed, _decreaseSpeed);
+            var distance = Vector3.Distance(anotherBall.transform.position, transform.position);
+
+            var halfRadius = ((_radius + anotherBall.Radius) - distance) / 2;
+
+            var newRadius1 = _radius - halfRadius;
+            var newRadius2 = anotherBall.Radius - halfRadius;
+
+            if (newRadius1 < _radius)
+                anotherBall.transform.localScale = Vector3.one * newRadius1 * 2;
+
+            if (newRadius2 < anotherBall.Radius)
+                transform.localScale = Vector3.one * newRadius2 * 2;
 
             if (transform.localScale.x <= _unitDestroyRadius)
                 Destroy();
@@ -87,7 +111,7 @@ namespace Unit
 
         private void Destroy()
         {
-            FindObjectOfType<GameListener>().RemoveBall(this);
+            PlayColorEffect(_ballEffectsConfig.Destroy, _meshRenderer.material.color);
             Destroy(gameObject);
         }
 
@@ -95,6 +119,26 @@ namespace Unit
         {
             transform.position = Vector3.MoveTowards(transform.position, transform.position + _direction,
                 _speed * Time.deltaTime);
+        }
+
+        //TODO Подумать над выделением класса
+        private void PlayEffect(ParticleSystem effect)
+        {
+            var spawnedEffect = Instantiate(effect, transform.position,
+                Quaternion.identity);
+            spawnedEffect.transform.SetParent(transform);
+            Destroy(spawnedEffect.gameObject, spawnedEffect.main.duration);
+        }
+
+        private void PlayColorEffect(ParticleSystem effect, Color color)
+        {
+            var spawnedEffect = Instantiate(effect, transform.position,
+                Quaternion.identity);
+
+            var mainModule = spawnedEffect.main;
+            mainModule.startColor = color;
+
+            Destroy(spawnedEffect.gameObject, mainModule.duration);
         }
     }
 }

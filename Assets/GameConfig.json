@@ -8,7 +8,7 @@
 		"unitSpawnMinRadius": 1.5,
 		"unitSpawnMaxRadius": 3,
 		"unitSpawnMinSpeed": 10,
-		"unitSpawnMaxSpeed": 30,
+		"unitSpawnMaxSpeed": 15,
 		"unitDestroyRadius": 1
 	}
 }
