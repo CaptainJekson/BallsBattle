@@ -82,10 +82,13 @@ namespace Unit
             transform.localScale -= new Vector3(_decreaseSpeed, _decreaseSpeed, _decreaseSpeed);
 
             if (transform.localScale.x <= _unitDestroyRadius)
-            {
-                FindObjectOfType<GameListener>().RemoveBall(this);
-                Destroy(gameObject);
-            }
+                Destroy();
+        }
+
+        private void Destroy()
+        {
+            FindObjectOfType<GameListener>().RemoveBall(this);
+            Destroy(gameObject);
         }
 
         private void Move()

@@ -5,10 +5,8 @@ using UnityEngine;
 
 namespace Game
 {
-    [RequireComponent(typeof(BallsCreator))]
     public class GameListener : MonoBehaviour
     {
-        private BallsCreator _ballsCreator;
         private List<Ball> _balls;
 
         private float _sumOfPlayerRadius;
@@ -16,17 +14,18 @@ namespace Game
 
         private int _playerBalls;
         private int _enemyBalls;
+        private DateTime _startGameTime;
 
         public IEnumerable<Ball> Balls => _balls;
 
         public static event Action<float, float> QuantityOfBallsChanged;
         public static event Action<float, float> GameStarted;
-        public static event Action<bool> GameOver;
+        public static event Action<bool, TimeSpan> GameOver;
 
         private void Awake()
         {
+            _startGameTime = DateTime.Now;
             _balls = new List<Ball>();
-            _ballsCreator = GetComponent<BallsCreator>();
         }
 
         public void OnStartGame()
@@ -67,8 +66,10 @@ namespace Game
             
             QuantityOfBallsChanged?.Invoke(_sumOfPlayerRadius, _sumOfEnemyRadius);
             
+            Debug.LogError($"Player ball - {_playerBalls} Enemy ball - {_enemyBalls}");
+            
             if(_enemyBalls <= 0 || _playerBalls <= 0)
-                GameOver?.Invoke(_enemyBalls <= 0);
+                GameOver?.Invoke(_enemyBalls <= 0, DateTime.Now - _startGameTime);
         }
     }
 }

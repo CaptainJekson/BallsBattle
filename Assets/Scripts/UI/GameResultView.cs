@@ -1,4 +1,5 @@
-﻿using Game;
+﻿using System;
+using Game;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,10 +28,10 @@ namespace UI
             _playAgainButton.onClick.RemoveListener(Close);
         }
 
-        private void Show(bool isWin)
+        private void Show(bool isWin, TimeSpan time)
         {
-            Debug.LogError(isWin ? _winText : _defeatText);
             _resultText.SetText(isWin ? _winText : _defeatText);
+            _gameTime.SetText(time.ToString(@"mm\:ss"));
             Open();
         }
     }
