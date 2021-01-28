@@ -13,14 +13,13 @@ namespace Unit
 
         private bool _isEnemy;
         private float _speed;
-        private float _radius;
         private float _unitDestroyRadius;
         private Vector3 _direction;
         private MeshRenderer _meshRenderer;
         private GameListener _gameListener;
 
         public bool IsEnemy => _isEnemy;
-        public float Radius => _radius;
+        public float Radius { get; private set; }
 
         private void Awake()
         {
@@ -41,7 +40,7 @@ namespace Unit
 
             if (anotherBall != null && anotherBall.IsEnemy != IsEnemy)
             {
-                PlayEffect(_ballEffectsConfig.Reduce);
+                this.PlayEffect(_ballEffectsConfig.Reduce);
                 return;
             }
 
@@ -70,13 +69,13 @@ namespace Unit
         {
             _isEnemy = isEnemy;
             _speed = speed;
-            _radius = radius;
             _unitDestroyRadius = unitDestroyRadius;
+            Radius = radius;
 
             _meshRenderer.material = isEnemy ? _redMaterial : _blueMaterial;
-            transform.localScale = Vector3.one * (_radius * 2);
+            transform.localScale = Vector3.one * (radius * 2);
 
-            PlayEffect(_ballEffectsConfig.Spawn);
+            this.PlayEffect(_ballEffectsConfig.Spawn);
         }
 
         public void StartMoving(Vector3 direction)
@@ -87,23 +86,30 @@ namespace Unit
         private void Bounce(Vector3 normal)
         {
             _direction = Vector3.Reflect(_direction, normal);
-            PlayEffect(_ballEffectsConfig.Collision);
+            this.PlayEffect(_ballEffectsConfig.Collision);
         }
 
         private void Reduce(Ball anotherBall)
         {
             var distance = Vector3.Distance(anotherBall.transform.position, transform.position);
 
-            var halfRadius = ((_radius + anotherBall.Radius) - distance) / 2;
+            var currentRadius1 = anotherBall.transform.localScale.x / 2;
+            var currentRadius2 = transform.localScale.x / 2;
+            var halfRadius = ((currentRadius1 + currentRadius2) - distance) / 2;
+            var newRadius1 = currentRadius1 - halfRadius;
+            var newRadius2 = currentRadius2 - halfRadius;
 
-            var newRadius1 = _radius - halfRadius;
-            var newRadius2 = anotherBall.Radius - halfRadius;
-
-            if (newRadius1 < _radius)
+            if (newRadius1 < currentRadius1)
+            {
                 anotherBall.transform.localScale = Vector3.one * newRadius1 * 2;
+                anotherBall.Radius = anotherBall.transform.localScale.x / 2;
+            }
 
-            if (newRadius2 < anotherBall.Radius)
+            if (newRadius2 < currentRadius2)
+            {
                 transform.localScale = Vector3.one * newRadius2 * 2;
+                Radius = anotherBall.transform.localScale.x / 2;
+            }
 
             if (transform.localScale.x <= _unitDestroyRadius)
                 Destroy();
@@ -111,7 +117,7 @@ namespace Unit
 
         private void Destroy()
         {
-            PlayColorEffect(_ballEffectsConfig.Destroy, _meshRenderer.material.color);
+            this.PlayEffect(_ballEffectsConfig.Destroy, _meshRenderer.material.color);
             Destroy(gameObject);
         }
 
@@ -119,26 +125,6 @@ namespace Unit
         {
             transform.position = Vector3.MoveTowards(transform.position, transform.position + _direction,
                 _speed * Time.deltaTime);
-        }
-
-        //TODO Подумать над выделением класса
-        private void PlayEffect(ParticleSystem effect)
-        {
-            var spawnedEffect = Instantiate(effect, transform.position,
-                Quaternion.identity);
-            spawnedEffect.transform.SetParent(transform);
-            Destroy(spawnedEffect.gameObject, spawnedEffect.main.duration);
-        }
-
-        private void PlayColorEffect(ParticleSystem effect, Color color)
-        {
-            var spawnedEffect = Instantiate(effect, transform.position,
-                Quaternion.identity);
-
-            var mainModule = spawnedEffect.main;
-            mainModule.startColor = color;
-
-            Destroy(spawnedEffect.gameObject, mainModule.duration);
         }
     }
 }

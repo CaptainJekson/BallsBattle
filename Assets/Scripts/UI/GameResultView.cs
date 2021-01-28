@@ -2,6 +2,7 @@
 using Game;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace UI
@@ -18,14 +19,13 @@ namespace UI
         private void OnEnable()
         {
             GameListener.GameOver += Show;
-            _playAgainButton.onClick.AddListener(Close);
-            _playAgainButton.onClick.AddListener(Close);
+            _playAgainButton.onClick.AddListener(PlayAgainOnButtonClick);
         }
 
         private void OnDisable()
         {
             GameListener.GameOver -= Show;
-            _playAgainButton.onClick.RemoveListener(Close);
+            _playAgainButton.onClick.RemoveListener(PlayAgainOnButtonClick);
         }
 
         private void Show(bool isWin, TimeSpan time)
@@ -33,6 +33,12 @@ namespace UI
             _resultText.SetText(isWin ? _winText : _defeatText);
             _gameTime.SetText(time.ToString(@"mm\:ss"));
             Open();
+        }
+
+        private void PlayAgainOnButtonClick()
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            Close();
         }
     }
 }

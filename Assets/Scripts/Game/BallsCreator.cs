@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using Unit;
 using UnityEngine;
 
@@ -28,16 +29,13 @@ namespace Game
         {
             yield return StartCoroutine(UnitSpawnDelay(false));
             yield return StartCoroutine(UnitSpawnDelay(true));
-
-            foreach (var ball in _gameListener.Balls)
-            {
-                var randomDirection = new Vector3(Random.Range(-1.0f, 1.0f), 0.0f, Random.Range(-1.0f, 1.0f));
-                ball.StartMoving(randomDirection);
-            }
+            
+            SetBallsMove(_gameListener.PlayerBalls);
+            SetBallsMove(_gameListener.EnemyBalls);
             
             _gameListener.OnStartGame();
         }
-        
+
         private IEnumerator UnitSpawnDelay(bool isEnemy)
         {
             for (var i = 0; i < _initGame.GameConfig.numUnitsToSpawn; i++)
@@ -61,6 +59,15 @@ namespace Game
                 spawnedBall.transform.position = randomSpawnPosition;
                 spawnedBall.Init(randomSpeed, randomRadius, _initGame.GameConfig.unitDestroyRadius, isEnemy);
                 _gameListener.AddBall(spawnedBall);
+            }
+        }
+        
+        private void SetBallsMove(IEnumerable<Ball> balls)
+        {
+            foreach (var ball in balls)
+            {
+                var randomDirection = new Vector3(Random.Range(-1.0f, 1.0f), 0.0f, Random.Range(-1.0f, 1.0f));
+                ball.StartMoving(randomDirection);
             }
         }
     }

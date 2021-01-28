@@ -14,7 +14,11 @@ namespace UI
         public override void Init()
         {
             GameListener.GameStarted += ShowStartingValues;
-            GameListener.QuantityOfBallsChanged += ShowValue;
+        }
+
+        private void Update()
+        {
+            UpdateValue();
         }
 
         private void ShowStartingValues(float playerBalls, float enemyBalls)
@@ -22,12 +26,16 @@ namespace UI
             _maxValue = playerBalls > enemyBalls ? playerBalls : enemyBalls;
             _playerFiller.fillAmount = playerBalls / _maxValue;
             _enemyFiller.fillAmount = enemyBalls / _maxValue;
+            
+            Open();
         }
 
-        private void ShowValue(float playerBalls, float enemyBalls)
+        private void UpdateValue()
         {
-            _playerFiller.fillAmount = playerBalls / _maxValue;
-            _enemyFiller.fillAmount = enemyBalls / _maxValue;
+            _playerFiller.fillAmount = GameListener.SumOfPlayerRadius / _maxValue;
+            _enemyFiller.fillAmount = GameListener.SumOfEnemyRadius / _maxValue;
+            
+            //Debug.LogError($" RedRadiusBalls = {GameListener.SumOfEnemyRadius} BlueRadiusBalls = {GameListener.SumOfPlayerRadius} MaxValue = {_maxValue}");
         }
     }
 }

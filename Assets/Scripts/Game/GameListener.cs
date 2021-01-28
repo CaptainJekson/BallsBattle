@@ -7,69 +7,82 @@ namespace Game
 {
     public class GameListener : MonoBehaviour
     {
-        private List<Ball> _balls;
+        private List<Ball> _playerBalls;
+        private List<Ball> _enemyBalls;
 
         private float _sumOfPlayerRadius;
         private float _sumOfEnemyRadius;
-
-        private int _playerBalls;
-        private int _enemyBalls;
         private DateTime _startGameTime;
 
-        public IEnumerable<Ball> Balls => _balls;
-
-        public static event Action<float, float> QuantityOfBallsChanged;
+        public IEnumerable<Ball> PlayerBalls => _playerBalls;
+        public IEnumerable<Ball> EnemyBalls => _enemyBalls;
+        public static float SumOfEnemyRadius { get; private set; } = 0.0f;
+        public static float SumOfPlayerRadius { get; private set; } = 0.0f;
+        
         public static event Action<float, float> GameStarted;
         public static event Action<bool, TimeSpan> GameOver;
 
         private void Awake()
         {
             _startGameTime = DateTime.Now;
-            _balls = new List<Ball>();
+            _enemyBalls = new List<Ball>();
+            _playerBalls = new List<Ball>();
+        }
+
+        private void Update()
+        {
+            RefreshRadius();
+        }
+
+        private void RefreshRadius()
+        {
+            SumOfEnemyRadius = 0.0f;
+            SumOfPlayerRadius = 0.0f;
+            
+            foreach (var ball in _enemyBalls)
+            {
+                SumOfEnemyRadius += ball.Radius;
+            }
+
+            foreach (var ball in _playerBalls)
+            {
+                SumOfPlayerRadius += ball.Radius;
+            }
         }
 
         public void OnStartGame()
         {
-            GameStarted?.Invoke(_sumOfPlayerRadius, _sumOfEnemyRadius);
+            var startRedRadiusBall = 0.0f;
+            var startBlueRadiusBall = 0.0f;
+            
+            foreach (var ball in _enemyBalls)
+            {
+                if (ball.IsEnemy)
+                    startRedRadiusBall += ball.Radius;
+                else
+                    startBlueRadiusBall += ball.Radius;
+            }
+
+            GameStarted?.Invoke(startBlueRadiusBall, startRedRadiusBall);
         }
 
         public void AddBall(Ball ball)
         {
-            if (ball.IsEnemy)
-            {
-                _sumOfEnemyRadius += ball.Radius;
-                _enemyBalls++;
-            }
+            if(ball.IsEnemy)
+                _enemyBalls.Add(ball);
             else
-            {
-                _sumOfPlayerRadius += ball.Radius;
-                _playerBalls++;
-            }
-
-            _balls.Add(ball);
+                _playerBalls.Add(ball);
         }
 
         public void RemoveBall(Ball ball)
         {
-            if (ball.IsEnemy)
-            {
-                _sumOfEnemyRadius -= ball.Radius;
-                _enemyBalls--;
-            }
+            if(ball.IsEnemy)
+                _enemyBalls.Remove(ball);
             else
-            {
-                _sumOfPlayerRadius -= ball.Radius;
-                _playerBalls--;
-            }
-
-            _balls.Remove(ball);
+                _playerBalls.Remove(ball);
             
-            QuantityOfBallsChanged?.Invoke(_sumOfPlayerRadius, _sumOfEnemyRadius);
-            
-            Debug.Log($"Player ball - {_playerBalls} Enemy ball - {_enemyBalls}");
-            
-            if(_enemyBalls <= 0 || _playerBalls <= 0)
-                GameOver?.Invoke(_enemyBalls <= 0, DateTime.Now - _startGameTime);
+            if(_enemyBalls.Count <= 0 || _playerBalls.Count <= 0)
+                GameOver?.Invoke(_enemyBalls.Count <= 0, DateTime.Now - _startGameTime);
         }
     }
 }
