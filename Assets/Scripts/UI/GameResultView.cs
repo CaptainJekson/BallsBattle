@@ -16,16 +16,13 @@ namespace UI
         [SerializeField] private TextMeshProUGUI _gameTime;
         [SerializeField] private Button _playAgainButton;
 
-        private void OnEnable()
-        {
-            GameListener.GameOver += Show;
-            _playAgainButton.onClick.AddListener(PlayAgainOnButtonClick);
-        }
+        private GameListener _gameListener;
 
-        private void OnDisable()
+        public override void Init()
         {
-            GameListener.GameOver -= Show;
-            _playAgainButton.onClick.RemoveListener(PlayAgainOnButtonClick);
+            _gameListener = FindObjectOfType<GameListener>();
+            _gameListener.GameOver += Show;
+            _playAgainButton.onClick.AddListener(PlayAgainOnButtonClick);
         }
 
         private void Show(bool isWin, TimeSpan time)
@@ -38,6 +35,7 @@ namespace UI
         private void PlayAgainOnButtonClick()
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            Time.timeScale = 1.0f;
             Close();
         }
     }

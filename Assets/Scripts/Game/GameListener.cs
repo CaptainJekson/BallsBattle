@@ -19,8 +19,8 @@ namespace Game
         public static float SumOfEnemyRadius { get; private set; } = 0.0f;
         public static float SumOfPlayerRadius { get; private set; } = 0.0f;
         
-        public static event Action<float, float> GameStarted;
-        public static event Action<bool, TimeSpan> GameOver;
+        public event Action<float, float> GameStarted;
+        public event Action<bool, TimeSpan> GameOver;
 
         private void Awake()
         {
@@ -80,9 +80,26 @@ namespace Game
                 _enemyBalls.Remove(ball);
             else
                 _playerBalls.Remove(ball);
+
+            if (_enemyBalls.Count > 0 && _playerBalls.Count > 0) return;
+            GameOver?.Invoke(_enemyBalls.Count <= 0, DateTime.Now - _startGameTime);
+            ClearAllBalls();
+        }
+
+        public void ClearAllBalls()
+        {
+            foreach (var ball in _playerBalls)
+            {
+                Destroy(ball.gameObject);
+            }
+
+            foreach (var ball in _enemyBalls)
+            {
+                Destroy(ball.gameObject);
+            }
             
-            if(_enemyBalls.Count <= 0 || _playerBalls.Count <= 0)
-                GameOver?.Invoke(_enemyBalls.Count <= 0, DateTime.Now - _startGameTime);
+            _playerBalls.Clear();
+            _enemyBalls.Clear();
         }
     }
 }

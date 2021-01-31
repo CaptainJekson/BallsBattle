@@ -2,11 +2,10 @@
 
 namespace Unit
 {
-    public static class BallExtention
+    public static class BallffectSpawner
     {
         public static void PlayEffect(this Ball ball, ParticleSystem effect)
         {
-            return;
             var spawnedEffect = Object.Instantiate(effect, ball.transform.position,
                 Quaternion.identity);
             spawnedEffect.transform.SetParent(ball.transform);
@@ -15,8 +14,6 @@ namespace Unit
 
         public static void PlayEffect(this Ball ball, ParticleSystem effect, Color color)
         {
-            return;
-            
             var spawnedEffect = Object.Instantiate(effect, ball.transform.position,
                 Quaternion.identity);
             

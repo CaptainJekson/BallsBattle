@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Game
+namespace Creators
 {
     [RequireComponent(typeof(InitGame))]
     public class WorldCreator : MonoBehaviour

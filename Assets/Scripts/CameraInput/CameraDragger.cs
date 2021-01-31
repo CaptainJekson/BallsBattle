@@ -5,13 +5,16 @@ namespace Camera
     public class CameraDragger : MonoBehaviour
     {
         [SerializeField] private Transform _joint;
-        [SerializeField] private float _speedRotate;
+        [SerializeField] [Range(0.0f, 1.0f)]private float _speedRotate;
 
         private Touch _inputTouch;
         private float _rotationY;
         
         private void LateUpdate()
         {
+            if(Input.touchCount > 1)
+                return;
+            
             foreach (var touch in Input.touches)
             {
                 if (touch.phase == TouchPhase.Began)

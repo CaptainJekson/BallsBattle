@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Game;
 using Unit;
 using UnityEngine;
 
-namespace Game
+namespace Creators
 {
     [RequireComponent(typeof(InitGame)), RequireComponent(typeof(GameListener))]
     public class BallsCreator : MonoBehaviour
@@ -13,6 +14,8 @@ namespace Game
         
         private InitGame _initGame;
         private GameListener _gameListener;
+
+        public Ball BallPrefab => _ballPrefab;
 
         private void Awake()
         {
@@ -44,24 +47,38 @@ namespace Game
 
                 var randomSpeed = Random.Range(_initGame.GameConfig.unitSpawnMinSpeed,
                     _initGame.GameConfig.unitSpawnMaxSpeed);
-
-                var randomRadius = Random.Range(_initGame.GameConfig.unitSpawnMinRadius,
-                    _initGame.GameConfig.unitSpawnMaxRadius);
-
+                var randomRadius = GetRandomRadius();
                 var height = _initGame.GameConfig.gameAreaHeight;
                 var width = _initGame.GameConfig.gameAreaWidth;
+                var randomSpawnPosition = GetRandomSpawnPosition(height, width);
 
-                var randomSpawnPosition = new Vector3(Random.Range(-(height / 2), height / 2),
-                    _ballHeight, Random.Range(-(width) / 2, width / 2));
+                while (Physics.CheckSphere(randomSpawnPosition, randomRadius))
+                {
+                    randomRadius = GetRandomRadius();
+                    randomSpawnPosition = GetRandomSpawnPosition(height, width);
+                }
 
-                var spawnedBall = Instantiate(_ballPrefab, transform.position, Quaternion.identity);
-
-                spawnedBall.transform.position = randomSpawnPosition;
+                var spawnedBall = Instantiate(_ballPrefab, randomSpawnPosition, Quaternion.identity);
+                spawnedBall.PlaySpawnEffect();
+                
                 spawnedBall.Init(randomSpeed, randomRadius, _initGame.GameConfig.unitDestroyRadius, isEnemy);
                 _gameListener.AddBall(spawnedBall);
             }
         }
-        
+
+        private Vector3 GetRandomSpawnPosition(float height, float width)
+        {
+            return new Vector3(Random.Range(-(height / 2), height / 2),
+                _ballHeight, Random.Range(-(width) / 2, width / 2));
+        }
+
+        private float GetRandomRadius()
+        {
+            var randomRadius = Random.Range(_initGame.GameConfig.unitSpawnMinRadius,
+                _initGame.GameConfig.unitSpawnMaxRadius);
+            return randomRadius;
+        }
+
         private void SetBallsMove(IEnumerable<Ball> balls)
         {
             foreach (var ball in balls)

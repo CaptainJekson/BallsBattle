@@ -3,7 +3,7 @@ using Serializable;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Game
+namespace Creators
 {
     public class InitGame : MonoBehaviour
     {

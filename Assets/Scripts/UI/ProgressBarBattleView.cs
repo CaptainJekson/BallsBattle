@@ -10,10 +10,12 @@ namespace UI
         [SerializeField] private Image _enemyFiller;
 
         private float _maxValue;
+        private GameListener _gameListener;
 
         public override void Init()
         {
-            GameListener.GameStarted += ShowStartingValues;
+            _gameListener = FindObjectOfType<GameListener>();
+            _gameListener.GameStarted += ShowStartingValues;
         }
 
         private void Update()
@@ -34,8 +36,6 @@ namespace UI
         {
             _playerFiller.fillAmount = GameListener.SumOfPlayerRadius / _maxValue;
             _enemyFiller.fillAmount = GameListener.SumOfEnemyRadius / _maxValue;
-            
-            //Debug.LogError($" RedRadiusBalls = {GameListener.SumOfEnemyRadius} BlueRadiusBalls = {GameListener.SumOfPlayerRadius} MaxValue = {_maxValue}");
         }
     }
 }

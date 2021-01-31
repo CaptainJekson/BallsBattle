@@ -1,5 +1,6 @@
 ﻿using Configs;
 using Game;
+using Serializable;
 using UnityEngine;
 
 namespace Unit
@@ -19,6 +20,7 @@ namespace Unit
         private GameListener _gameListener;
 
         public bool IsEnemy => _isEnemy;
+        public bool IsTriggered { get; private set; }
         public float Radius { get; private set; }
 
         private void Awake()
@@ -60,11 +62,6 @@ namespace Unit
             }
         }
 
-        private void OnDestroy()
-        {
-            _gameListener.RemoveBall(this);
-        }
-
         public void Init(float speed, float radius, float unitDestroyRadius, bool isEnemy = false)
         {
             _isEnemy = isEnemy;
@@ -74,8 +71,6 @@ namespace Unit
 
             _meshRenderer.material = isEnemy ? _redMaterial : _blueMaterial;
             transform.localScale = Vector3.one * (radius * 2);
-
-            this.PlayEffect(_ballEffectsConfig.Spawn);
         }
 
         public void StartMoving(Vector3 direction)
@@ -83,10 +78,23 @@ namespace Unit
             _direction = direction;
         }
 
+        public void PlaySpawnEffect()
+        {
+            this.PlayEffect(_ballEffectsConfig.Spawn);
+        }
+
         private void Bounce(Vector3 normal)
         {
             _direction = Vector3.Reflect(_direction, normal);
             this.PlayEffect(_ballEffectsConfig.Collision);
+        }
+
+        public BallSaveData GetSaveData()
+        {
+            var newBallData = new BallSaveData(transform.position, Radius, _unitDestroyRadius,
+                _speed, _direction, IsEnemy);
+
+            return newBallData;
         }
 
         private void Reduce(Ball anotherBall)
@@ -118,6 +126,7 @@ namespace Unit
         private void Destroy()
         {
             this.PlayEffect(_ballEffectsConfig.Destroy, _meshRenderer.material.color);
+            _gameListener.RemoveBall(this);
             Destroy(gameObject);
         }
 
